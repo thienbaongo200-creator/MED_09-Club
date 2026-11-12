@@ -13,8 +13,11 @@ _cacache/
 _logs/
 *.tsbuildinfo
 *.log
+.idea/
+_update-notifier-last-checked
 .env
 .env.*
 !.env.example
 !.env.local.example
+!.env.docker-test.example
 TEMP_ARCHIVE_BEFORE_PUSH/

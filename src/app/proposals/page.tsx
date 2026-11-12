@@ -6,6 +6,7 @@ import { formatCurrency, formatDate, TRANG_THAI_DE_XUAT_LABEL } from "@/lib/form
 import { RoleGuard } from "@/components/RoleGuard";
 import { EmptyState, ErrorState, ForbiddenState, LoadingState } from "@/components/States";
 import { StatusBadge } from "@/components/StatusBadge";
+import { vietnameseNativeValidationHandlers } from "@/lib/form-validation";
 import type { DeXuatChiDto, KetQuaVote, TrangThaiDeXuat } from "@/lib/types";
 
 const TABS: { key: TrangThaiDeXuat; label: string }[] = [
@@ -278,6 +279,7 @@ function CreateProposalForm({ onCreated }: { onCreated: () => void }) {
 
   return (
     <form
+      {...vietnameseNativeValidationHandlers}
       onSubmit={handleSubmit}
       className="flex flex-col gap-3 rounded-lg border border-moss-300 bg-moss-50/60 p-5"
     >

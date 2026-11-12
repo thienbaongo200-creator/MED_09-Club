@@ -6,6 +6,7 @@ import { formatDate, TRANG_THAI_THAM_GIA_LABEL } from "@/lib/format";
 import { RoleGuard } from "@/components/RoleGuard";
 import { EmptyState, ErrorState, ForbiddenState, LoadingState } from "@/components/States";
 import { StatusBadge } from "@/components/StatusBadge";
+import { vietnameseNativeValidationHandlers } from "@/lib/form-validation";
 import { useAuth } from "@/context/AuthContext";
 import type { SuKienDto, ThanhVienSuKienDto } from "@/lib/types";
 
@@ -365,6 +366,7 @@ function CreateEventForm({ onCreated, initialEvent }: { onCreated: (event: SuKie
 
   return (
     <form
+      {...vietnameseNativeValidationHandlers}
       onSubmit={handleSubmit}
       className="grid gap-3 rounded-lg border border-moss-300 bg-moss-50/60 p-5 sm:grid-cols-2"
     >

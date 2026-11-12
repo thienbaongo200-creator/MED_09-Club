@@ -1,10 +1,22 @@
 ﻿# MED-09
 
-Ứng dụng quản lý câu lạc bộ, thành viên, quỹ, đề xuất chi, biểu quyết và sự kiện. README này mô tả trạng thái source hiện tại; khi có khác biệt, source code, schema và cấu hình đang chạy được ưu tiên để mô tả hành vi thực tế.
+MED-09 là đồ án xây dựng cổng quản lý câu lạc bộ, tập trung vào thành viên, sự kiện, quỹ hoạt động và đề xuất chi.
 
 ## Tổng quan
 
-MED-09 cung cấp đăng nhập theo vai trò, quản lý thành viên, ghi nhận giao dịch quỹ và chứng từ, lập và biểu quyết đề xuất chi, quản lý sự kiện/đăng ký/điểm danh, cùng các báo cáo hiện có. Hệ thống gồm Next.js frontend, NestJS API, PostgreSQL và object storage tương thích S3.
+Hệ thống có đăng nhập theo vai trò, quản lý thành viên, giao dịch quỹ và chứng từ, đề xuất chi và biểu quyết, sự kiện, điểm danh, cùng các báo cáo hiện có.
+
+## Mục tiêu
+
+Đề tài nhằm gom các công việc quản lý câu lạc bộ vào một hệ thống: theo dõi thành viên và sự kiện, ghi nhận thu chi, và công khai số liệu quỹ nhưng vẫn che thông tin liên hệ của thành viên.
+
+## Công nghệ sử dụng
+
+- Frontend: Next.js, React, TypeScript và Tailwind CSS.
+- Backend: NestJS, TypeScript và PostgreSQL (`pg`).
+- Lưu chứng từ: object storage tương thích S3.
+- Chạy dịch vụ: Docker Compose.
+- Kiểm thử: Node.js test runner và Playwright.
 
 ## Kiến trúc
 
@@ -59,9 +71,11 @@ backend/test/        Unit và integration test của backend
 database/            Schema, seed, integrity và tài khoản test/demo
 e2e/                 Playwright flows và cấu hình môi trường E2E
 scripts/             Script hỗ trợ chạy và phát triển
-docs/                Đặc tả, audit, UML và test traceability
+docs/                Báo cáo đồ án, biểu mẫu và sơ đồ MED-09
 docker-compose.yml   Các service chạy bằng Docker Compose
 ```
+
+Đặc tả chính thức là [báo cáo đồ án](./docs/1250080015_Ngô%20Quốc%20Thiên%20Bảo.docx). Hướng dẫn database nằm trong [database/README.md](./database/README.md).
 
 ## Chức năng và route giao diện
 
@@ -70,20 +84,20 @@ docker-compose.yml   Các service chạy bằng Docker Compose
 | `/login` | Đăng nhập |
 | `/` | Dashboard theo vai trò |
 | `/profile` | Hồ sơ người dùng |
-| `/members` | Danh sách/quản lý thành viên và thao tác vai trò dành cho ADMIN |
-| `/fund` | Giao dịch quỹ, chứng từ và thao tác quỹ theo quyền |
+| `/members` | Danh sách, tạo thành viên, đổi trạng thái và đổi vai trò dành cho ADMIN |
+| `/fund` | Xem sao kê, tạo/sửa giao dịch và tải/xem chứng từ theo quyền |
 | `/proposals` | Danh sách đề xuất và biểu quyết |
 | `/dashboard/proposals` | Rà soát/duyệt đề xuất dành cho người có quyền |
 | `/events` | Sự kiện, đăng ký và thao tác quản lý/điểm danh được tích hợp trong trang |
 | `/reports` | Báo cáo hiện có |
 
-Source hiện không có route trang riêng cho đăng ký sự kiện, điểm danh hoặc phân quyền; các thao tác này nằm trong những màn hình nêu trên. Trang Báo cáo hiện chưa có chức năng xuất báo cáo.
+Không có trang riêng cho đăng ký sự kiện, điểm danh hoặc phân quyền; các thao tác này nằm trong những màn hình nêu trên. Trang Báo cáo chưa có chức năng xuất báo cáo.
 
 ### Nhóm chức năng
 
 - **Đăng nhập:** xác thực tài khoản và tải thông tin người dùng hiện tại.
-- **Quản lý thành viên:** xem, tạo, cập nhật, thay đổi trạng thái; ADMIN có thể đổi vai trò.
-- **Quản lý quỹ:** xem tổng quan và giao dịch, tạo/cập nhật giao dịch, ghi nhận giao dịch đảo và tải chứng từ theo quyền.
+- **Quản lý thành viên:** xem, tạo, khóa/mở khóa; ADMIN có thể đổi vai trò. Backend có API sửa hồ sơ, nhưng trang `/members` chưa có form sửa.
+- **Quản lý quỹ:** xem tổng quan và sao kê, tạo/sửa giao dịch nhập tay, tải/xem chứng từ theo quyền. API hỗ trợ đảo giao dịch; giao diện chưa có thao tác đảo.
 - **Đề xuất chi:** tạo đề xuất, biểu quyết, duyệt hoặc từ chối theo vai trò.
 - **Sự kiện:** tạo/cập nhật sự kiện, đăng ký, xem danh sách đăng ký và ghi nhận điểm danh theo quyền.
 - **Báo cáo:** báo cáo quỹ và báo cáo điểm danh theo sự kiện cho vai trò được phép.
@@ -105,7 +119,7 @@ Các endpoint dưới đây có prefix `/api`. Tất cả đường dẫn đư�
 
 ## Business Rules BR01–BR08
 
-Các tóm tắt dưới đây mô tả quy tắc nghiệp vụ trong source hiện tại; chi tiết và các khác biệt với đặc tả nằm trong `docs/MED09_FINAL.docx` và tài liệu audit.
+Các quy tắc dưới đây tóm tắt cách xử lý trong source. Nội dung đặc tả đầy đủ nằm trong [báo cáo đồ án](./docs/1250080015_Ngô%20Quốc%20Thiên%20Bảo.docx).
 
 | Rule | Tóm tắt hiện thực |
 |---|---|
@@ -116,14 +130,38 @@ Các tóm tắt dưới đây mô tả quy tắc nghiệp vụ trong source hi�
 | BR05 | Các thao tác quản lý quỹ/duyệt và phân vai trò được giới hạn theo role; service bảo vệ ADMIN hoạt động cuối cùng. |
 | BR06 | Tự động duyệt chỉ khi số phiếu đồng ý nhiều hơn không đồng ý và số dư đủ; nếu không đủ điều kiện thì không ghi chi. Source không triển khai quorum/deadline biểu quyết. |
 | BR07 | Người tạo đề xuất không được tự duyệt; kiểm tra ở service và database. |
-| BR08 | Không có luồng xóa giao dịch quỹ; điều chỉnh được thực hiện bằng giao dịch đảo. Source hiện giới hạn mỗi giao dịch gốc có tối đa một giao dịch đảo. |
+| BR08 | Không xóa giao dịch quỹ; sai sót được điều chỉnh bằng giao dịch đảo. Hiện tại mỗi giao dịch gốc chỉ có thể có một giao dịch đảo. |
+
+## Chạy local
+
+Cần cài Node.js và có PostgreSQL sẵn sàng. Từ thư mục gốc, tạo các tệp cấu hình từ mẫu nếu chưa có:
+
+```powershell
+if (-not (Test-Path .env.local)) { Copy-Item .env.local.example .env.local }
+if (-not (Test-Path backend\.env)) { Copy-Item backend\.env.example backend\.env }
+```
+
+Cập nhật `DATABASE_URL` trong `backend/.env` để trỏ tới database local đã khởi tạo theo [hướng dẫn database](./database/README.md). Sau đó chạy:
+
+```powershell
+npm run install:all
+npm run dev:all
+```
+
+`.env.local.example` trỏ frontend tới API local. `backend/.env.example` tắt storage; các chức năng chứng từ cần bật và cấu hình object storage.
 
 ## Chạy bằng Docker
 
-Yêu cầu Docker Desktop/Engine đang chạy và tệp `.env.docker-test` có sẵn. Các lệnh dưới đây dùng project/database kiểm thử riêng.
+Yêu cầu Docker Desktop/Engine đang chạy. Nếu chưa có cấu hình test, tạo tệp từ mẫu và thay các giá trị `<CHANGE_ME>`:
 
 ```powershell
+if (-not (Test-Path .env.docker-test)) { Copy-Item .env.docker-test.example .env.docker-test }
 docker compose -p med09v5test --env-file .env.docker-test up -d --build
+```
+
+Các lệnh trên dùng project/database kiểm thử riêng. Tắt các service sau khi xong:
+
+```powershell
 docker compose -p med09v5test --env-file .env.docker-test down
 ```
 
@@ -139,7 +177,7 @@ npm run lint
 npm test
 ```
 
-`npm run build` build frontend Next.js; backend có script riêng `npm run build:backend`, hoặc build cả hai với `npm run build:all`. `npm test` chạy các backend unit test được khai báo trong root script. Integration test và E2E có script riêng (`npm run test:integration`, `npm run test:e2e`) và cần các dịch vụ/môi trường tương ứng.
+`npm run build` build frontend Next.js; dùng `npm run build:all` để build cả frontend và backend. `npm test` chạy các backend unit test được khai báo trong root script. Integration test và E2E có script riêng (`npm run test:integration`, `npm run test:e2e`) và cần các dịch vụ/môi trường tương ứng. Các test hiện có được ghi theo yêu cầu trong [TEST_TRACEABILITY.md](./TEST_TRACEABILITY.md).
 
 ## Tài khoản demo
 
@@ -153,24 +191,11 @@ Các email dưới đây được seed trong bộ dữ liệu test/demo. Mật k
 
 Mật khẩu test mẫu: `123456`. Không dùng các tài khoản/mật khẩu này trên môi trường triển khai thật.
 
-## Trạng thái hiện tại
+## Ghi chú
 
-### Đã hoàn thành trong source
-
-- Các route giao diện liệt kê ở trên và dashboard thay đổi widget theo ba vai trò.
-- API xác thực, thành viên, quỹ/chứng từ, đề xuất/biểu quyết, sự kiện/điểm danh và báo cáo.
-- PostgreSQL, các ràng buộc dữ liệu chính và lưu chứng từ qua object storage trong Docker Compose.
-- Unit, integration và E2E test source hiện diện trong repository.
-
-### Giới hạn còn lại
-
-- Không có trang riêng cho đăng ký sự kiện, điểm danh hoặc phân quyền; thao tác được tích hợp vào trang hiện có.
-- Chưa có API/UI xuất báo cáo.
-- Business rule BR08 trong source chỉ cho phép tối đa một giao dịch đảo cho giao dịch gốc; cần đối chiếu với cách diễn đạt đầy đủ trong đặc tả nếu yêu cầu nhiều lần điều chỉnh.
-- Source không có Repository layer riêng; service truy vấn PostgreSQL trực tiếp.
-- Bộ test integration/E2E phụ thuộc môi trường dịch vụ; việc có test source không đồng nghĩa mọi test đã chạy thành công trong mọi môi trường.
-
-Chi tiết sai khác README cũ và phạm vi rà soát được ghi trong [`README_AUDIT.md`](./docs/evidence/README_AUDIT.md) và [`README_UPDATE_REPORT.md`](./docs/implementation/README_UPDATE_REPORT.md).
+- Source hiện không có Repository layer riêng; service truy vấn PostgreSQL trực tiếp.
+- Các test integration và E2E cần database, Docker và cấu hình môi trường tương ứng; có test source không đồng nghĩa mọi test đều đã chạy trên máy mới.
+- Báo cáo đồ án ghi nhận 31/32 test case đạt; TC32 còn một phần và chưa có test case riêng cho nhánh bảo vệ ADMIN hoạt động cuối cùng.
 
 ### Lệnh truy vấn database
 `docker exec -it med09v5test-postgres_db-1 psql -U med09test -d med09_docker_test`

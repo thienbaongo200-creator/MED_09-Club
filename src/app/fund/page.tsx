@@ -6,6 +6,7 @@ import { formatCurrency, formatDate } from "@/lib/format";
 import { RoleGuard } from "@/components/RoleGuard";
 import { EmptyState, ErrorState, ForbiddenState, LoadingState } from "@/components/States";
 import { Pagination } from "@/components/Pagination";
+import { vietnameseNativeValidationHandlers } from "@/lib/form-validation";
 import { useAuth } from "@/context/AuthContext";
 import type {
   FundSummaryDto,
@@ -81,11 +82,16 @@ function FundPageContent() {
   const [transactionError, setTransactionError] = useState<string | null>(null);
   const [transactionMessage, setTransactionMessage] = useState<string | null>(null);
   const [isSubmittingTransaction, setIsSubmittingTransaction] = useState(false);
+  const [editingTransaction, setEditingTransaction] = useState<PublicStatementDto | null>(null);
+  const [editError, setEditError] = useState<string | null>(null);
+  const [editMessage, setEditMessage] = useState<string | null>(null);
+  const [isSubmittingEdit, setIsSubmittingEdit] = useState(false);
   const [voucherFile, setVoucherFile] = useState<File | null>(null);
   const [voucherValidationError, setVoucherValidationError] = useState<string | null>(null);
   const [isValidatingVoucher, setIsValidatingVoucher] = useState(false);
   const [pendingVoucherTransactionId, setPendingVoucherTransactionId] = useState<string | null>(null);
   const transactionSubmitLock = useRef(false);
+  const editSubmitLock = useRef(false);
   const voucherValidationSequence = useRef(0);
 
   const load = useCallback(async (f: FundTransactionFilter) => {
@@ -140,6 +146,60 @@ function FundPageContent() {
     }
   }
 
+  function handleStartEdit(tx: PublicStatementDto) {
+    setEditingTransaction(tx);
+    setEditError(null);
+    setEditMessage(null);
+  }
+
+  async function handleUpdateTransaction(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!editingTransaction || editSubmitLock.current) return;
+
+    const data = new FormData(event.currentTarget);
+    const rawAmount = String(data.get("soTien") ?? "").trim();
+    const amountPattern = /^-?\d+(?:\.\d{1,2})?$/;
+    const amount = Number(rawAmount);
+    const noiDung = String(data.get("noiDung") ?? "").trim();
+
+    if (!rawAmount) {
+      setEditError("Vui lòng nhập số tiền.");
+      return;
+    }
+    if (!amountPattern.test(rawAmount) || !Number.isFinite(amount)) {
+      setEditError("Số tiền không đúng định dạng (tối đa 2 chữ số thập phân).");
+      return;
+    }
+    if (amount <= 0) {
+      setEditError("Số tiền phải lớn hơn 0.");
+      return;
+    }
+    if (!noiDung) {
+      setEditError("Vui lòng nhập nội dung giao dịch.");
+      return;
+    }
+
+    editSubmitLock.current = true;
+    setIsSubmittingEdit(true);
+    setEditError(null);
+    setEditMessage(null);
+    try {
+      await api.patch(`/fund/transactions/${editingTransaction.id}`, {
+        loai: data.get("loai"),
+        soTien: amount,
+        noiDung
+      });
+      setEditingTransaction(null);
+      setEditMessage("Đã cập nhật giao dịch.");
+      await load(filter);
+    } catch (err) {
+      setEditError(err instanceof Error ? err.message : "Không thể cập nhật giao dịch.");
+    } finally {
+      editSubmitLock.current = false;
+      setIsSubmittingEdit(false);
+    }
+  }
+
   async function handleCreateTransaction(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (transactionSubmitLock.current) return;
@@ -153,7 +213,7 @@ function FundPageContent() {
       return;
     }
     if (pendingVoucherTransactionId && !voucherFile) {
-      setTransactionError("Chọn tệp chứng từ để thử tải lên giao dịch đã ghi nhận.");
+      setTransactionError("Chọn tệp chứng từ để tiếp tục tải lên giao dịch đã ghi nhận.");
       return;
     }
 
@@ -215,7 +275,7 @@ function FundPageContent() {
       const backendMessage = err instanceof Error ? err.message : "Không thể tạo giao dịch.";
       if (transactionCreatedNow && transactionId) {
         setPendingVoucherTransactionId(transactionId);
-        setTransactionError(`Giao dịch đã ghi nhận nhưng upload chứng từ lỗi: ${backendMessage}`);
+        setTransactionError(`Giao dịch đã ghi nhận nhưng tải chứng từ gặp lỗi: ${backendMessage}`);
         await load(filter);
       } else {
         setTransactionError(backendMessage);
@@ -260,7 +320,7 @@ function FundPageContent() {
       {hasRole("ADMIN", "THU_QUY") && (
         <section className="rounded-lg border border-ink/10 bg-white p-4">
           <h2 className="font-display text-xl text-ink">Ghi giao dịch thủ công</h2>
-          <form className="mt-3 grid gap-3 sm:grid-cols-2" onSubmit={handleCreateTransaction}>
+          <form {...vietnameseNativeValidationHandlers} className="mt-3 grid gap-3 sm:grid-cols-2" onSubmit={handleCreateTransaction}>
             <label className="flex flex-col gap-1 text-sm">
               <span>Loại giao dịch</span>
               <select name="loai" required className="rounded-md border border-ink/15 px-2 py-2">
@@ -395,6 +455,12 @@ function FundPageContent() {
         </label>
       </section>
 
+      {editMessage && (
+        <p role="status" className="text-sm text-moss-700">
+          {editMessage}
+        </p>
+      )}
+
       {status === "loading" && <LoadingState label="Đang tải sao kê quỹ..." />}
       {status === "error" && (
         <ErrorState message={errorMessage ?? undefined} onRetry={() => load(filter)} />
@@ -414,7 +480,9 @@ function FundPageContent() {
                 <th className="px-4 py-3 font-medium">Nội dung</th>
                 <th className="px-4 py-3 text-right font-medium">Số tiền</th>
                 <th className="px-4 py-3 font-medium">Người thực hiện</th>
-                <th className="px-4 py-3 font-medium">Chứng từ</th>
+                <th className="px-4 py-3 font-medium">
+                  {hasRole("ADMIN", "THU_QUY") ? "Chứng từ / Thao tác" : "Chứng từ"}
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -447,17 +515,30 @@ function FundPageContent() {
                     {tx.nguoiThucHien}
                   </td>
                   <td className="px-4 py-3">
-                    {hasRole("ADMIN", "THU_QUY") && tx.coChungTu ? (
-                      <button
-                        onClick={() => handleOpenVoucher(tx)}
-                        className="rounded-md border border-ink/15 px-2.5 py-1 text-xs transition hover:bg-ink/5"
-                        title="Mở chứng từ bằng URL ký có thời hạn"
-                      >
-                        Xem chứng từ
-                      </button>
-                    ) : (
-                      <span className="text-ink/40">—</span>
-                    )}
+                    <div className="flex flex-wrap gap-2">
+                      {hasRole("ADMIN", "THU_QUY") && tx.coChungTu && (
+                        <button
+                          onClick={() => handleOpenVoucher(tx)}
+                          className="rounded-md border border-ink/15 px-2.5 py-1 text-xs transition hover:bg-ink/5"
+                          title="Mở chứng từ bằng URL ký có thời hạn"
+                        >
+                          Xem chứng từ
+                        </button>
+                      )}
+                      {hasRole("ADMIN", "THU_QUY") && !tx.deXuatId && (
+                        <button
+                          type="button"
+                          onClick={() => handleStartEdit(tx)}
+                          aria-label={`Sửa giao dịch ${tx.noiDung}`}
+                          className="rounded-md border border-ink/15 px-2.5 py-1 text-xs text-ink hover:bg-ink/5"
+                        >
+                          Sửa
+                        </button>
+                      )}
+                      {(!hasRole("ADMIN", "THU_QUY") || (!tx.coChungTu && Boolean(tx.deXuatId))) && (
+                        <span className="text-ink/40">—</span>
+                      )}
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -470,6 +551,82 @@ function FundPageContent() {
               onChange={(page) => setFilter((f) => ({ ...f, page }))}
             />
           </div>
+        </section>
+      )}
+
+      {editingTransaction && hasRole("ADMIN", "THU_QUY") && (
+        <section aria-labelledby="edit-transaction-title" className="rounded-lg border border-ink/10 bg-white p-4">
+          <h2 id="edit-transaction-title" className="font-display text-xl text-ink">
+            Sửa giao dịch
+          </h2>
+          <p className="mt-2 text-sm text-ink/60">
+            Sao kê đã che thông tin liên hệ. Hãy nhập lại đầy đủ nội dung giao dịch trước khi lưu.
+          </p>
+          <form
+            {...vietnameseNativeValidationHandlers}
+            className="mt-3 grid gap-3 sm:grid-cols-2"
+            onSubmit={handleUpdateTransaction}
+          >
+            <label className="flex flex-col gap-1 text-sm">
+              <span>Loại giao dịch</span>
+              <select
+                name="loai"
+                defaultValue={editingTransaction.loai}
+                required
+                className="rounded-md border border-ink/15 px-2 py-2"
+              >
+                <option value="THU">Thu</option>
+                <option value="CHI">Chi</option>
+              </select>
+            </label>
+            <label className="flex flex-col gap-1 text-sm">
+              <span>Số tiền</span>
+              <input
+                name="soTien"
+                type="text"
+                inputMode="decimal"
+                autoComplete="off"
+                defaultValue={String(editingTransaction.soTien)}
+                required
+                aria-describedby="edit-transaction-help"
+                className="rounded-md border border-ink/15 px-2 py-2"
+              />
+            </label>
+            <label className="flex flex-col gap-1 text-sm sm:col-span-2">
+              <span>Nội dung</span>
+              <textarea
+                name="noiDung"
+                maxLength={2000}
+                required
+                rows={3}
+                className="rounded-md border border-ink/15 px-3 py-2"
+              />
+            </label>
+            <p id="edit-transaction-help" className="text-xs text-ink/60 sm:col-span-2">
+              Số tiền phải lớn hơn 0, tối đa 2 chữ số thập phân; số dư quỹ không được âm.
+            </p>
+            {editError && <p role="alert" className="text-sm text-red-700 sm:col-span-2">{editError}</p>}
+            <div className="flex flex-wrap gap-2 sm:col-span-2">
+              <button
+                type="submit"
+                disabled={isSubmittingEdit}
+                className="rounded-md bg-moss-700 px-4 py-2 text-white disabled:opacity-50"
+              >
+                {isSubmittingEdit ? "Đang lưu…" : "Lưu thay đổi"}
+              </button>
+              <button
+                type="button"
+                disabled={isSubmittingEdit}
+                onClick={() => {
+                  setEditingTransaction(null);
+                  setEditError(null);
+                }}
+                className="rounded-md border border-ink/15 px-4 py-2 text-ink disabled:opacity-50"
+              >
+                Hủy
+              </button>
+            </div>
+          </form>
         </section>
       )}
     </div>

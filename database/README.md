@@ -79,7 +79,7 @@ Không chạy `01_schema.sql` trên database hiện hữu và không dùng `DROP
 
 ## Tài khoản và cấu hình kết nối
 
-Tài khoản mẫu local dùng mật khẩu `123456` và được cập nhật bởi `03_test_account_credentials.sql`. Chỉ dùng cho phát triển/kiểm thử; thay thông tin đăng nhập trước triển khai. File `.env.docker-test` cấu hình user/database riêng của Compose; `.env` và `backend/.env` dùng cho cấu hình local khác. Các giá trị `POSTGRES_PASSWORD` và `DATABASE_URL` phải đồng bộ với mật khẩu role thực sự trên PostgreSQL. Sửa env không tự đổi password trong server đang chạy.
+Tài khoản mẫu local dùng mật khẩu `123456` và được cập nhật bởi `03_test_account_credentials.sql`. Chỉ dùng cho phát triển/kiểm thử; thay thông tin đăng nhập trước triển khai. File `.env.docker-test` cấu hình user/database riêng của Compose; `.env` cung cấp các giá trị mặc định cho Compose. Compose tự tạo `DATABASE_URL` cho backend container từ `POSTGRES_USER`, `POSTGRES_PASSWORD` và `POSTGRES_DB`; khi chạy backend local, `backend/.env` cung cấp `DATABASE_URL`. Nếu các cấu hình này dùng cùng một PostgreSQL role thì mật khẩu phải khớp với role thực tế. Sửa env không tự đổi password trong server đang chạy.
 
 Khi kết nối từ host dùng `localhost` và cổng host được cấu hình; từ container backend dùng hostname `postgres_db` và cổng nội bộ `5432`. Cả hai phải chọn đúng database và `search_path=dbo`. Không đưa nội dung `.env*` vào Git hoặc báo cáo. Khi có ký tự đặc biệt trong password, URL-encode thành phần password trong `DATABASE_URL`.
 

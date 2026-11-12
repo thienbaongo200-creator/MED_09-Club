@@ -4,6 +4,7 @@ import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { ApiError } from "@/lib/api";
+import { vietnameseNativeValidationHandlers } from "@/lib/form-validation";
 
 export default function LoginPage() {
   const { login } = useAuth();
@@ -52,7 +53,7 @@ export default function LoginPage() {
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="col-span-3 flex flex-col gap-5 p-8 md:p-10">
+        <form {...vietnameseNativeValidationHandlers} onSubmit={handleSubmit} className="col-span-3 flex flex-col gap-5 p-8 md:p-10">
           <div>
             <h2 className="font-display text-2xl text-ink">Đăng nhập</h2>
             <p className="mt-1 font-body text-sm text-ink/60">

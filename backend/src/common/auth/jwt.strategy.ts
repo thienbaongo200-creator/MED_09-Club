@@ -15,7 +15,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   async validate(payload: { sub: string; email: string }): Promise<{ sub: string; email: string; role: Role }> {
     const result = await this.db.query('SELECT id, email, vai_tro, trang_thai FROM dbo.thanh_vien WHERE id = $1', [payload.sub]);
     const member = result.rows[0];
-    if (!member || member.trang_thai !== 'ACTIVE') throw new UnauthorizedException();
+    if (!member || member.trang_thai !== 'ACTIVE') throw new UnauthorizedException('Phiên đăng nhập không hợp lệ hoặc đã hết hạn.');
     return { sub: member.id, email: member.email, role: member.vai_tro };
   }
 }

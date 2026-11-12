@@ -63,13 +63,19 @@ export async function apiFetch<T>(
   if (!formDataBody) headers["Content-Type"] = "application/json";
   if (token) headers.Authorization = `Bearer ${token}`;
 
-  const res = await fetch(`${API_BASE_URL}${path}${buildQuery(options.query)}`, {
-    method: options.method ?? "GET",
-    headers,
-    body: formDataBody ?? (options.body ? JSON.stringify(options.body) : undefined),
-    signal: options.signal,
-    cache: "no-store"
-  });
+  let res: Response;
+  try {
+    res = await fetch(`${API_BASE_URL}${path}${buildQuery(options.query)}`, {
+      method: options.method ?? "GET",
+      headers,
+      body: formDataBody ?? (options.body ? JSON.stringify(options.body) : undefined),
+      signal: options.signal,
+      cache: "no-store"
+    });
+  } catch (error) {
+    if (error instanceof DOMException && error.name === "AbortError") throw error;
+    throw new Error("Không thể kết nối tới máy chủ. Vui lòng thử lại.");
+  }
 
   if (res.status === 204) {
     return undefined as T;
@@ -80,8 +86,13 @@ export async function apiFetch<T>(
 
   if (!res.ok) {
     const body = data as ApiErrorBody | undefined;
+    const responseMessage = (body as { message?: unknown } | undefined)?.message;
     const message =
-      body?.message ??
+      (typeof responseMessage === "string"
+        ? responseMessage
+        : Array.isArray(responseMessage)
+        ? responseMessage.filter((item): item is string => typeof item === "string").join(" ")
+        : undefined) ??
       (res.status === 401
         ? "Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại."
         : res.status === 403

@@ -35,7 +35,7 @@ export class ObjectStorageService implements OnModuleInit {
       this.available = true;
     } catch {
       this.available = false;
-      throw new ServiceUnavailableException('Object Storage khong kha dung.');
+      throw new ServiceUnavailableException('Dịch vụ lưu trữ tệp hiện không khả dụng.');
     }
   }
   async delete(key: string) {
@@ -44,7 +44,7 @@ export class ObjectStorageService implements OnModuleInit {
       this.available = true;
     } catch {
       this.available = false;
-      throw new ServiceUnavailableException('Object Storage khong kha dung.');
+      throw new ServiceUnavailableException('Dịch vụ lưu trữ tệp hiện không khả dụng.');
     }
   }
   async onModuleInit() {
@@ -71,7 +71,7 @@ export class ObjectStorageService implements OnModuleInit {
       return url;
     } catch {
       this.available = false;
-      throw new ServiceUnavailableException('Object Storage khong kha dung.');
+      throw new ServiceUnavailableException('Dịch vụ lưu trữ tệp hiện không khả dụng.');
     }
   }
   async isReady() {
@@ -87,7 +87,7 @@ export class ObjectStorageService implements OnModuleInit {
   }
   isEnabled() { return this.enabled; }
   private requireEnabled(): S3Client {
-    if (!this.enabled || !this.s3) throw new ServiceUnavailableException('Object Storage đang bị tắt.');
+    if (!this.enabled || !this.s3) throw new ServiceUnavailableException('Dịch vụ lưu trữ tệp hiện đang tắt.');
     return this.s3;
   }
 }

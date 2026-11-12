@@ -32,7 +32,7 @@ export class MembersService {
   }
   async update(id: string, input: UpdateMemberDto, actor: AuthUser) {
     const target = await this.get(id);
-    if (actor.role === 'THU_QUY' && target.vaiTro === 'ADMIN') throw new ForbiddenException('THU_QUY không được sửa tài khoản ADMIN.');
+    if (actor.role === 'THU_QUY' && target.vaiTro === 'ADMIN') throw new ForbiddenException('Thủ quỹ không được sửa tài khoản ADMIN.');
     const fields: string[] = []; const values: unknown[] = [];
     const set = (column: string, value: unknown) => { values.push(value); fields.push(`${column}=$${values.length}`); };
     if (input.hoTen !== undefined) set('ho_ten', input.hoTen);
@@ -42,7 +42,7 @@ export class MembersService {
     values.push(id, actor.role === 'ADMIN', actor.sub);
     try {
       const { rows } = await this.db.query(`UPDATE dbo.thanh_vien SET ${fields.join(',')},ngay_cap_nhat=NOW(),nguoi_cap_nhat_id=$${values.length} WHERE id=$${values.length - 2} AND ($${values.length - 1}::boolean OR vai_tro <> 'ADMIN') RETURNING ${this.projection}`, values);
-      if (!rows[0]) throw new ForbiddenException('THU_QUY không được sửa tài khoản ADMIN.');
+      if (!rows[0]) throw new ForbiddenException('Thủ quỹ không được sửa tài khoản ADMIN.');
       return rows[0];
     } catch (error: any) {
       if (error?.code === '23505') throw new ConflictException('Email đã được sử dụng.');
@@ -57,7 +57,7 @@ export class MembersService {
       const { rows } = await client.query('SELECT id,vai_tro,trang_thai FROM dbo.thanh_vien WHERE id=$1 FOR UPDATE', [id]);
       const target = rows[0];
       if (!target) throw new NotFoundException('Không tìm thấy thành viên.');
-      if (actor.role === 'THU_QUY' && target.vai_tro === 'ADMIN') throw new ForbiddenException('THU_QUY không được khóa tài khoản ADMIN.');
+      if (actor.role === 'THU_QUY' && target.vai_tro === 'ADMIN') throw new ForbiddenException('Thủ quỹ không được khóa tài khoản ADMIN.');
       if (target.vai_tro === 'ADMIN' && target.trang_thai === 'ACTIVE' && status === 'INACTIVE') {
         const admins = await client.query(`SELECT count(*)::int AS count FROM dbo.thanh_vien WHERE vai_tro='ADMIN' AND trang_thai='ACTIVE'`);
         if (Number(admins.rows[0].count) <= 1) throw new ConflictException('Hệ thống phải luôn có ít nhất một ADMIN đang hoạt động.');

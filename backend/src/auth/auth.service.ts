@@ -29,7 +29,7 @@ export class AuthService {
 
   async me(memberId: string) {
     const { rows } = await this.db.query(`SELECT id, ho_ten, email, so_dien_thoai, vai_tro, trang_thai, ngay_tham_gia FROM dbo.thanh_vien WHERE id=$1`, [memberId]);
-    if (!rows[0] || rows[0].trang_thai !== 'ACTIVE') throw new UnauthorizedException();
+    if (!rows[0] || rows[0].trang_thai !== 'ACTIVE') throw new UnauthorizedException('Phiên đăng nhập không hợp lệ hoặc đã hết hạn.');
     return this.toUser(rows[0]);
   }
 

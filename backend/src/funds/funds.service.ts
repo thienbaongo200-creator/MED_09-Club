@@ -47,7 +47,7 @@ export class FundsService {
   }
 
   async voucherUrl(transactionId: string, actor: AuthUser) {
-    if (!['ADMIN', 'THU_QUY'].includes(actor.role)) throw new ForbiddenException('Chỉ ADMIN hoặc THU_QUỸ được truy cập chứng từ.');
+    if (!['ADMIN', 'THU_QUY'].includes(actor.role)) throw new ForbiddenException('Chỉ quản trị viên hoặc thủ quỹ được truy cập chứng từ.');
     const { rows } = await this.db.query(`SELECT c.object_key FROM dbo.chung_tu c WHERE c.giao_dich_id=$1 ORDER BY c.ngay_tai_len DESC LIMIT 1`, [transactionId]);
     const voucher = rows[0];
     if (!voucher) throw new NotFoundException('Chứng từ không tồn tại.');

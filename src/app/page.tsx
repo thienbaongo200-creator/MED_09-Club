@@ -36,7 +36,7 @@ function ResourceStat({
 }
 
 function ShortcutGrid({ children }: { children: React.ReactNode }) {
-  return <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">{children}</div>;
+  return <div className="grid grid-cols-1 sm:grid-cols-2 sm:gap-x-8">{children}</div>;
 }
 
 export default function DashboardPage() {
@@ -90,10 +90,9 @@ export default function DashboardPage() {
   const fundBalance = data?.fund?.capNhatLuc ? formatCurrency(data.fund.soDuHienTai) : null;
 
   return (
-    <main className="mx-auto max-w-6xl space-y-8 px-4 py-6 sm:px-6 sm:py-8">
+    <div className="space-y-8">
       <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <p className="font-mono text-xs uppercase tracking-wide text-clay-500">MED-09 · DashboardPage</p>
           <h1 className="mt-1 font-display text-3xl text-ink sm:text-4xl">Xin chào, {user.hoTen}</h1>
           <p className="mt-2 text-sm text-ink/60">Tổng quan hoạt động câu lạc bộ theo vai trò {roleLabel}.</p>
         </div>
@@ -185,6 +184,6 @@ export default function DashboardPage() {
           onRetry={() => setRefreshKey((key) => key + 1)}
         />
       )}
-    </main>
+    </div>
   );
 }

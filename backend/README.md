@@ -65,4 +65,4 @@ Integration suite chỉ được phép ghi vào `med09_docker_test` của Compos
 
 Mỗi suite có run ID và fixture được gắn nhãn riêng; cleanup xóa theo email/tên/nội dung thuộc lượt chạy và kiểm tra baseline trước/sau. Một run lock dùng chung với Playwright ngăn hai suite cùng ghi database. Nếu test dừng bất thường hoặc cleanup không khớp baseline, lock được giữ lại để kiểm tra trước lần chạy sau. Không xóa lock thủ công trước khi xác định không còn test process đang hoạt động.
 
-Ma trận test và giới hạn xác minh hiện hành nằm ở [`docs/evidence/TEST_TRACEABILITY.md`](../docs/evidence/TEST_TRACEABILITY.md).
+Báo cáo đồ án ghi nhận 31/32 test case đạt; TC32 còn một phần và chưa có test case riêng cho nhánh giữ ADMIN hoạt động cuối cùng. Danh sách liên kết FR/UC với các test source hiện có nằm trong [TEST_TRACEABILITY.md](../TEST_TRACEABILITY.md); tài liệu không gán mã test mới cho các test chưa có mã.
