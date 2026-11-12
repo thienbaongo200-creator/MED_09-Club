@@ -1,0 +1,36 @@
+{
+  "name": "club-fund-portal",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "dev:backend": "npm --prefix backend run start:dev",
+    "dev:all": "node scripts/dev-all.mjs",
+    "build": "next build",
+    "build:backend": "npm --prefix backend run build",
+    "build:all": "npm run build && npm run build:backend",
+    "install:all": "npm install && npm --prefix backend install",
+    "start": "next start",
+    "lint": "eslint src next.config.mjs tailwind.config.ts postcss.config.mjs --max-warnings=0",
+    "test": "npm --prefix backend test",
+    "test:integration": "npm --prefix backend run test:integration",
+    "test:e2e": "playwright test"
+  },
+  "dependencies": {
+    "next": "16.4.3",
+    "react": "19.3.1",
+    "react-dom": "19.3.1"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.64.1",
+    "@types/node": "20.14.15",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "autoprefixer": "10.4.19",
+    "eslint": "10.13.0",
+    "eslint-config-next": "16.4.3",
+    "postcss": "8.5.32",
+    "tailwindcss": "3.4.7",
+    "typescript": "5.5.4"
+  }
+}
