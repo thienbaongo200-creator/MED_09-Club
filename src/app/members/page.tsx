@@ -5,6 +5,7 @@ import { RoleGuard } from "@/components/RoleGuard";
 import { ApiError, api } from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
 import { vietnameseNativeValidationHandlers } from "@/lib/form-validation";
+import { TRANG_THAI_TAI_KHOAN_LABEL, VAI_TRO_LABEL } from "@/lib/format";
 import type { ThanhVien, VaiTro } from "@/lib/types";
 
 function MembersContent() {
@@ -116,13 +117,13 @@ function MembersContent() {
                           onChange={(e) => void updateMember(m.id, { vaiTro: e.target.value as VaiTro })}
                           className="rounded-md border border-ink/15 px-2 py-1"
                         >
-                          <option>ADMIN</option>
-                          <option>THU_QUY</option>
-                          <option>THANH_VIEN</option>
+                          <option value="ADMIN">{VAI_TRO_LABEL.ADMIN}</option>
+                          <option value="THU_QUY">{VAI_TRO_LABEL.THU_QUY}</option>
+                          <option value="THANH_VIEN">{VAI_TRO_LABEL.THANH_VIEN}</option>
                         </select>
-                      ) : m.vaiTro}
+                      ) : VAI_TRO_LABEL[m.vaiTro]}
                     </td>
-                    <td className="p-3">{m.trangThai}</td>
+                    <td className="p-3">{TRANG_THAI_TAI_KHOAN_LABEL[m.trangThai]}</td>
                     <td className="p-3">
                       <button
                         className="rounded-md border border-ink/15 px-2 py-1 hover:bg-ink/5"

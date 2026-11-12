@@ -134,7 +134,7 @@ export default function DashboardPage() {
               <ResourceStat label="Số dư quỹ hiện tại" value={fundBalance} loading={isLoading} />
               <ResourceStat label="Đề xuất đang chờ" value={pendingCount} loading={isLoading} />
               <ResourceStat label="Sự kiện sắp tới" value={upcomingEvents?.length ?? null} loading={isLoading} />
-              <ResourceStat label="Thành viên ACTIVE" value={activeMembers?.length ?? null} loading={isLoading} />
+              <ResourceStat label="Thành viên đang hoạt động" value={activeMembers?.length ?? null} loading={isLoading} />
             </div>
           </DashboardSection>
           <DashboardSection title="Tác vụ nhanh">
@@ -152,16 +152,16 @@ export default function DashboardPage() {
           <DashboardSection title="Tình hình câu lạc bộ">
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
               <ResourceStat label="Tổng thành viên" value={data?.members?.length ?? null} loading={isLoading} />
-              <ResourceStat label="Thành viên ACTIVE" value={activeMembers?.length ?? null} loading={isLoading} />
+              <ResourceStat label="Thành viên đang hoạt động" value={activeMembers?.length ?? null} loading={isLoading} />
               <ResourceStat label="Đề xuất đang chờ" value={pendingCount} loading={isLoading} />
               <ResourceStat label="Sự kiện sắp tới" value={upcomingEvents?.length ?? null} loading={isLoading} />
             </div>
           </DashboardSection>
           {activeAdmins && activeAdmins.length <= 1 && (
             <aside role="alert" className="rounded-lg border border-clay-500/40 bg-clay-500/10 p-4 text-sm text-ink">
-              <strong className="block font-medium">Cảnh báo ADMIN ACTIVE cuối cùng</strong>
+              <strong className="block font-medium">Cảnh báo quản trị viên hoạt động cuối cùng</strong>
               <span className="mt-1 block text-ink/70">
-                Hệ thống hiện có {activeAdmins.length} ADMIN ACTIVE. Hãy giữ ít nhất một tài khoản ADMIN đang hoạt động.
+                Hệ thống hiện có {activeAdmins.length} tài khoản quản trị viên đang hoạt động. Hãy giữ ít nhất một tài khoản quản trị viên đang hoạt động.
               </span>
             </aside>
           )}

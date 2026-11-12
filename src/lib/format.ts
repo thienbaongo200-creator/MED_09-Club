@@ -1,3 +1,5 @@
+import type { TrangThaiTaiKhoan } from "./types";
+
 export function formatCurrency(value: number): string {
   return new Intl.NumberFormat("vi-VN", {
     style: "currency",
@@ -21,6 +23,11 @@ export const VAI_TRO_LABEL: Record<string, string> = {
   ADMIN: "Quản trị viên",
   THU_QUY: "Thủ quỹ",
   THANH_VIEN: "Thành viên"
+};
+
+export const TRANG_THAI_TAI_KHOAN_LABEL: Record<TrangThaiTaiKhoan, string> = {
+  ACTIVE: "Đang hoạt động",
+  INACTIVE: "Không hoạt động"
 };
 
 export const TRANG_THAI_DE_XUAT_LABEL: Record<string, string> = {

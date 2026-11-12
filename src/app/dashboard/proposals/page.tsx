@@ -59,7 +59,7 @@ function TreasurerProposalsContent() {
       const message =
         err instanceof ApiError
           ? err.status === 409
-            ? "Đề xuất đã được xử lý bởi yêu cầu khác hoặc không còn ở trạng thái PENDING."
+            ? "Đề xuất đã được xử lý bởi yêu cầu khác hoặc không còn ở trạng thái chờ xử lý."
             : err.status === 422
             ? err.message || "Đề xuất chưa đủ điều kiện duyệt hoặc quỹ không đủ số dư; trạng thái chưa thay đổi."
             : err.message
@@ -100,9 +100,9 @@ function TreasurerProposalsContent() {
             Quản lý &amp; duyệt đề xuất chi
           </h1>
           <p className="mt-1 max-w-2xl font-body text-sm text-ink/60">
-            Nút &quot;Phê duyệt&quot; chỉ khả dụng khi đề xuất còn PENDING, biểu quyết
-            đạt AGREE &gt; DISAGREE và số dư quỹ đủ. Máy chủ kiểm tra lại toàn bộ điều
-            kiện trong một transaction trước khi ghi nhận.
+            Nút &quot;Phê duyệt&quot; chỉ khả dụng khi đề xuất còn ở trạng thái chờ xử lý,
+            số lượt đồng ý nhiều hơn số lượt không đồng ý và số dư quỹ đủ. Máy chủ kiểm tra lại toàn bộ điều
+            kiện trong một giao dịch trước khi ghi nhận.
           </p>
         </div>
         {summary && (
@@ -122,7 +122,7 @@ function TreasurerProposalsContent() {
       {status === "idle" && proposals.length === 0 && (
         <EmptyState
           title="Không có đề xuất nào đang chờ duyệt"
-          description="Mọi đề xuất PENDING sẽ xuất hiện tại đây để thủ quỹ xử lý."
+          description="Mọi đề xuất đang chờ xử lý sẽ xuất hiện tại đây để thủ quỹ xử lý."
         />
       )}
 
@@ -177,7 +177,7 @@ function TreasurerProposalsContent() {
                     <td className="px-4 py-3">
                       <ul className="flex flex-col gap-1 text-xs">
                         <li className={passesVote ? "text-moss-600" : "text-ink/40"}>
-                          {passesVote ? "✓" : "✕"} AGREE &gt; DISAGREE
+                          {passesVote ? "✓" : "✕"} Số đồng ý &gt; số không đồng ý
                         </li>
                         <li className={hasEnoughBalance ? "text-moss-600" : "text-rust-600"}>
                           {hasEnoughBalance ? "✓" : "✕"} Đủ số dư quỹ

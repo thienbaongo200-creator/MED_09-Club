@@ -3,7 +3,7 @@
 import { RoleGuard } from "@/components/RoleGuard";
 import { LoadingState, ErrorState } from "@/components/States";
 import { useAuth } from "@/context/AuthContext";
-import { VAI_TRO_LABEL } from "@/lib/format";
+import { TRANG_THAI_TAI_KHOAN_LABEL, VAI_TRO_LABEL } from "@/lib/format";
 
 function ProfileContent() {
   const { user, isLoading } = useAuth();
@@ -16,7 +16,7 @@ function ProfileContent() {
       <div><dt className="text-sm text-ink/50">Email</dt><dd>{user.email}</dd></div>
       <div><dt className="text-sm text-ink/50">Số điện thoại</dt><dd>{user.soDienThoai || "Chưa cập nhật"}</dd></div>
       <div><dt className="text-sm text-ink/50">Vai trò</dt><dd>{VAI_TRO_LABEL[user.vaiTro]}</dd></div>
-      <div><dt className="text-sm text-ink/50">Trạng thái</dt><dd>{user.trangThai}</dd></div>
+      <div><dt className="text-sm text-ink/50">Trạng thái</dt><dd>{TRANG_THAI_TAI_KHOAN_LABEL[user.trangThai]}</dd></div>
       <div><dt className="text-sm text-ink/50">Ngày tham gia</dt><dd>{new Date(user.ngayThamGia).toLocaleDateString("vi-VN")}</dd></div>
     </dl>
   </div>;

@@ -48,7 +48,7 @@ function buildQuery(query?: RequestOptions["query"]): string {
  * apiFetch — lớp gọi API duy nhất của Frontend.
  * Mọi màn hình đều đi qua đây để: gắn JWT, chuẩn hoá lỗi 400/401/403/409,
  * và tuyệt đối không tự suy diễn/masking dữ liệu ở phía client (BR02) —
- * Frontend chỉ hiển thị nguyên trạng những gì Backend trả về.
+ * Frontend giữ nguyên dữ liệu từ Backend và dịch các thông báo HTTP mặc định sang tiếng Việt.
  */
 export async function apiFetch<T>(
   path: string,
@@ -87,16 +87,28 @@ export async function apiFetch<T>(
   if (!res.ok) {
     const body = data as ApiErrorBody | undefined;
     const responseMessage = (body as { message?: unknown } | undefined)?.message;
-    const message =
-      (typeof responseMessage === "string"
+    const responseText =
+      typeof responseMessage === "string"
         ? responseMessage
         : Array.isArray(responseMessage)
         ? responseMessage.filter((item): item is string => typeof item === "string").join(" ")
-        : undefined) ??
+        : undefined;
+    const defaultHttpMessages: Record<string, string> = {
+      unauthorized: "Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại.",
+      forbidden: "Bạn không có quyền thực hiện thao tác này.",
+      "forbidden resource": "Bạn không có quyền thực hiện thao tác này.",
+      "not found": "Không tìm thấy nội dung yêu cầu."
+    };
+    const message =
+      (responseText
+        ? defaultHttpMessages[responseText.trim().toLowerCase()] ?? responseText
+        : responseText) ??
       (res.status === 401
         ? "Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại."
         : res.status === 403
         ? "Bạn không có quyền thực hiện thao tác này."
+        : res.status === 404
+        ? "Không tìm thấy nội dung yêu cầu."
         : res.status === 409
         ? "Yêu cầu xung đột với trạng thái hiện tại của dữ liệu."
         : "Đã xảy ra lỗi, vui lòng thử lại.");

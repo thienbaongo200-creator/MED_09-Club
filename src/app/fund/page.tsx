@@ -592,8 +592,14 @@ function FundPageContent() {
                 className="rounded-md border border-ink/15 px-2 py-2"
               />
             </label>
+            <div className="flex flex-col gap-1 text-sm sm:col-span-2">
+              <span>Nội dung hiện tại (đã che)</span>
+              <p className="rounded-md border border-ink/10 bg-ink/5 px-3 py-2 text-ink/80">
+                {editingTransaction.noiDung}
+              </p>
+            </div>
             <label className="flex flex-col gap-1 text-sm sm:col-span-2">
-              <span>Nội dung</span>
+              <span>Nội dung mới</span>
               <textarea
                 name="noiDung"
                 maxLength={2000}
